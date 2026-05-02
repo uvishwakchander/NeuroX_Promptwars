@@ -107,17 +107,31 @@ function initWellness() {
     const canvas = document.getElementById('gameCanvas');
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
+    
+    // Fix canvas resolution
+    function resizeCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    // Initial resize with slight delay to ensure DOM is ready
+    setTimeout(resizeCanvas, 100);
+
     let bubbles = [];
     let score = 0;
     let gameActive = false;
 
     const startBtn = document.getElementById('startGameBtn');
-    startBtn.addEventListener('click', () => {
-        gameActive = true;
-        document.querySelector('.game-overlay-ui').classList.add('hidden');
-        spawnBubbles();
-        requestAnimationFrame(gameLoop);
-    });
+    if (startBtn) {
+        startBtn.addEventListener('click', () => {
+            gameActive = true;
+            document.querySelector('.game-overlay-ui').classList.add('hidden');
+            resizeCanvas(); // Ensure size is correct when starting
+            spawnBubbles();
+            requestAnimationFrame(gameLoop);
+        });
+    }
 
     canvas.addEventListener('mousedown', (e) => {
         if (!gameActive) return;
@@ -129,6 +143,7 @@ function initWellness() {
             const dist = Math.sqrt((x-b.x)**2 + (y-b.y)**2);
             if (dist < b.r) {
                 score += 10;
+                // Add pop effect here later if needed
                 return false;
             }
             return true;
@@ -137,36 +152,42 @@ function initWellness() {
 
     function spawnBubbles() {
         if (!gameActive) return;
-        if (bubbles.length < 5) {
+        if (bubbles.length < 8) {
             bubbles.push({
                 x: Math.random() * canvas.width,
-                y: canvas.height + 20,
-                r: 20 + Math.random() * 30,
-                speed: 1 + Math.random() * 2
+                y: canvas.height + 30,
+                r: 15 + Math.random() * 25,
+                speed: 1 + Math.random() * 2.5
             });
         }
-        setTimeout(spawnBubbles, 1000);
+        setTimeout(spawnBubbles, 800);
     }
 
     function gameLoop() {
         if (!gameActive) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // Draw Score
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.font = '20px Space Grotesk';
+        ctx.fillText(`Score: ${score}`, 10, 30);
+
         bubbles.forEach(b => {
             b.y -= b.speed;
             ctx.beginPath();
             ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 240, 255, 0.3)';
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
             ctx.fill();
             ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 2;
             ctx.stroke();
         });
         
-        bubbles = bubbles.filter(b => b.y + b.r > 0);
+        bubbles = bubbles.filter(b => b.y + b.r > -10);
         requestAnimationFrame(gameLoop);
     }
 
-    // AI Chat
+    // ───────── AI THERAPY CHAT ─────────
     const chatInput = document.getElementById('chatInput');
     const sendBtn = document.getElementById('sendChatBtn');
     const history = document.getElementById('chatHistory');
@@ -179,25 +200,39 @@ function initWellness() {
         history.scrollTop = history.scrollHeight;
     };
 
-    sendBtn.addEventListener('click', async () => {
-        const msg = chatInput.value.trim();
-        if (!msg) return;
-        
-        appendMsg(msg, 'user');
-        chatInput.value = '';
-        
-        try {
-            const res = await fetch(`${API_BASE}/therapy-chat`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg })
-            });
-            const data = await res.json();
-            appendMsg(data.reply, 'ai');
-        } catch (e) {
-            appendMsg("I'm having trouble connecting to your neural state right now.", 'ai');
-        }
-    });
+    if (sendBtn && chatInput) {
+        sendBtn.addEventListener('click', async () => {
+            const msg = chatInput.value.trim();
+            if (!msg) return;
+            
+            appendMsg(msg, 'user');
+            chatInput.value = '';
+            
+            try {
+                const res = await fetch(`${API_BASE}/therapy-chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg })
+                });
+                
+                if (res.ok) {
+                    const data = await res.json();
+                    appendMsg(data.reply, 'ai');
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (e) {
+                console.error("Chat error:", e);
+                // Fallback deterministic response for testing
+                appendMsg("I'm having trouble connecting to my Gemini core. Take a deep breath, I am here to listen.", 'ai');
+            }
+        });
+
+        // Add enter key support
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendBtn.click();
+        });
+    }
 }
 
 // ───────── RELAY DASHBOARD LOGIC ─────────
