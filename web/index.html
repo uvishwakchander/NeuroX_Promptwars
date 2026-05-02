@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NeuroX · Relay-Nudge Command Center</title>
+  <meta name="description" content="NeuroX Relay-Nudge Platform — Intelligent task redirection that protects deep work by routing urgent tasks away from hyper-focused team members." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ───────── Ambient BG particles ───────── -->
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- ───────── Header ───────── -->
+  <header class="header" id="appHeader">
+    <div class="header__brand">
+      <div class="header__logo" id="logoOrb">
+        <span class="header__logo-ring"></span>
+        <span class="header__logo-core">NX</span>
+      </div>
+      <div>
+        <h1 class="header__title">NeuroX</h1>
+        <p class="header__sub">Relay-Nudge Command Center</p>
+      </div>
+    </div>
+    <div class="header__status">
+      <span class="header__dot" id="apiDot"></span>
+      <span class="header__status-text" id="apiStatus">Connecting…</span>
+    </div>
+  </header>
+
+  <!-- ───────── Main grid ───────── -->
+  <main class="dashboard" id="dashboard">
+
+    <!-- ─── Left: Team Profiles ─── -->
+    <section class="panel panel--profiles" id="profilesPanel">
+      <h2 class="panel__heading">
+        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+        Team NeuroProfiles
+      </h2>
+      <div class="profiles-grid" id="profilesGrid">
+        <!-- JS-rendered -->
+      </div>
+    </section>
+
+    <!-- ─── Center: Relay Console ─── -->
+    <section class="panel panel--console" id="consolePanel">
+      <h2 class="panel__heading">
+        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        Relay Nudge
+      </h2>
+
+      <form class="relay-form" id="relayForm" autocomplete="off">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="taskId">Task ID</label>
+            <input type="text" id="taskId" placeholder="TSK-042" required />
+          </div>
+          <div class="form-group">
+            <label for="urgency">Urgency</label>
+            <select id="urgency" required>
+              <option value="critical">🔴 Critical</option>
+              <option value="high">🟠 High</option>
+              <option value="medium" selected>🟡 Medium</option>
+              <option value="low">🟢 Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="taskTitle">Title</label>
+          <input type="text" id="taskTitle" placeholder="Production DB Outage" required maxlength="256" />
+        </div>
+
+        <div class="form-group">
+          <label for="taskDesc">Description</label>
+          <textarea id="taskDesc" rows="3" placeholder="Primary PostgreSQL cluster is unreachable. All write operations failing…" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="source">Source</label>
+            <input type="text" id="source" placeholder="PagerDuty" required />
+          </div>
+          <div class="form-group">
+            <label for="targetUser">Target User</label>
+            <select id="targetUser" required>
+              <option value="user-100">Vishwak Chander</option>
+              <option value="user-200">Kiran Desai</option>
+              <option value="user-300">Meena Rajput</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn--relay" id="submitBtn">
+          <span class="btn__text">Send Relay Nudge</span>
+          <span class="btn__loader" id="btnLoader"></span>
+        </button>
+      </form>
+    </section>
+
+    <!-- ─── Right: Response / History ─── -->
+    <section class="panel panel--response" id="responsePanel">
+      <h2 class="panel__heading">
+        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Relay Response
+      </h2>
+
+      <!-- Empty state -->
+      <div class="response-empty" id="responseEmpty">
+        <div class="response-empty__orb"></div>
+        <p>Waiting for a relay nudge…</p>
+      </div>
+
+      <!-- Success card -->
+      <div class="response-card hidden" id="responseCard">
+        <div class="response-card__badge" id="responseBadge">REDIRECTED</div>
+
+        <div class="response-card__flow">
+          <div class="flow-node flow-node--from">
+            <span class="flow-node__label">From</span>
+            <span class="flow-node__name" id="resFrom">—</span>
+          </div>
+          <div class="flow-arrow">
+            <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h40m0 0l-8-8m8 8l-8 8"/></svg>
+          </div>
+          <div class="flow-node flow-node--to">
+            <span class="flow-node__label">To</span>
+            <span class="flow-node__name" id="resTo">—</span>
+            <span class="flow-node__state" id="resToState">—</span>
+          </div>
+        </div>
+
+        <div class="response-card__metrics">
+          <div class="metric">
+            <span class="metric__label">Task Score</span>
+            <span class="metric__value" id="resScore">—</span>
+          </div>
+          <div class="metric">
+            <span class="metric__label">Task ID</span>
+            <span class="metric__value" id="resTaskId">—</span>
+          </div>
+        </div>
+
+        <div class="response-card__summary">
+          <span class="summary__label">AI Summary</span>
+          <p class="summary__text" id="resSummary">—</p>
+        </div>
+      </div>
+
+      <!-- Error card -->
+      <div class="response-error hidden" id="responseError">
+        <div class="response-error__icon">⚠</div>
+        <p class="response-error__code" id="errCode">—</p>
+        <p class="response-error__detail" id="errDetail">—</p>
+      </div>
+
+      <!-- History -->
+      <div class="history" id="historySection">
+        <h3 class="history__heading">Recent Relays</h3>
+        <ul class="history__list" id="historyList">
+          <!-- JS-rendered -->
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <!-- ───────── Score gauge overlay ───────── -->
+  <div class="gauge-overlay hidden" id="gaugeOverlay">
+    <div class="gauge">
+      <svg class="gauge__svg" viewBox="0 0 120 120">
+        <circle class="gauge__track" cx="60" cy="60" r="52" />
+        <circle class="gauge__fill" id="gaugeFill" cx="60" cy="60" r="52" />
+      </svg>
+      <span class="gauge__value" id="gaugeValue">0</span>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
