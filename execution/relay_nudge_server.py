@@ -15,7 +15,7 @@ from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from execution.mvp_models import (
@@ -112,8 +112,13 @@ async def _global_exception_handler(
 
 
 # ---------------------------------------------------------------------------
-# Health check
+# Health check & Root
 # ---------------------------------------------------------------------------
+
+@app.get("/")
+async def root_redirect():
+    """Redirect base URL to the web platform."""
+    return RedirectResponse(url="/app/")
 
 @app.get("/health", tags=["ops"])
 async def health_check() -> dict[str, str]:
