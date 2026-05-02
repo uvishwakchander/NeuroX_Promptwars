@@ -3,24 +3,26 @@
    ================================================================ */
 
 :root {
-    --bg-base: #050507;
-    --bg-surface: #0e0e12;
-    --bg-card: #15151b;
-    --bg-glow: rgba(0, 240, 255, 0.05);
+    --bg-base: #0e0e0f; /* surface-container-lowest */
+    --bg-surface: #131314; /* surface */
+    --bg-card: #201f20; /* surface-container */
+    --bg-card-high: #2a2a2b; /* surface-container-high */
     
-    --primary: #00f0ff;
-    --primary-glow: rgba(0, 240, 255, 0.3);
-    --secondary: #7000ff;
-    --secondary-glow: rgba(112, 0, 255, 0.2);
-    --accent: #ff007a;
+    --primary: #00f0ff; /* primary-container */
+    --primary-light: #dbfcff; /* primary */
+    --on-primary: #00363a;
+    --secondary: #d1bcff;
+    --secondary-container: #7000ff;
     
-    --text-main: #e5e2e3;
-    --text-dim: #b9cacb;
-    --text-muted: #5d5f5f;
+    --text-main: #e5e2e3; /* on-surface */
+    --text-dim: #b9cacb; /* on-surface-variant */
+    --outline: #849495;
+    --outline-variant: #3b494b;
     
-    --radius-sm: 4px;
-    --radius-md: 12px;
-    --radius-lg: 24px;
+    /* Shape Language: Strictly Sharp (0px) */
+    --radius-sm: 0px;
+    --radius-md: 0px;
+    --radius-lg: 0px;
     
     --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.5s cubic-bezier(0.2, 0, 0, 1);
@@ -60,8 +62,13 @@ canvas#particleCanvas {
     gap: 8px;
 }
 
-.btn--primary { background: var(--primary); color: #000; }
-.btn--primary:hover { box-shadow: 0 0 20px var(--primary-glow); transform: translateY(-2px); }
+.btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.btn--primary { background: var(--primary); color: #000; border: 1px solid var(--primary); }
+.btn--primary:hover { background: var(--primary-light); }
 
 .btn--google {
     background: #fff;
@@ -72,13 +79,13 @@ canvas#particleCanvas {
 
 .module-card {
     background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: var(--radius-md);
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Surface level border */
+    border-radius: var(--radius-md); /* 0px */
     padding: 24px;
     transition: var(--transition-fast);
 }
 
-.module-card:hover { border-color: var(--primary-glow); }
+.module-card:hover { border-color: var(--primary); }
 
 /* ───────── VIEWS ───────── */
 .view {
@@ -174,13 +181,12 @@ input[type=range] {
 .sidebar {
     width: 80px;
     background: var(--bg-surface);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 24px 0;
-    gap: 40px;
-    z-index: 50;
+    z-index: 10;
 }
 
 .logo-nx {
@@ -197,10 +203,10 @@ input[type=range] {
 
 .nav-item {
     width: 48px; height: 48px;
-    border-radius: 12px;
+    border-radius: 0px;
     background: transparent;
     border: none;
-    color: var(--text-muted);
+    color: var(--text-dim);
     display: grid; place-items: center;
     cursor: pointer;
     transition: var(--transition-fast);
@@ -209,13 +215,14 @@ input[type=range] {
 .nav-item svg { width: 24px; height: 24px; }
 .nav-item:hover, .nav-item.active {
     color: var(--primary);
-    background: rgba(0, 240, 255, 0.1);
+    background: rgba(0, 240, 255, 0.05);
+    border-right: 2px solid var(--primary);
 }
 
 .user-avatar {
     width: 40px; height: 40px;
     background: var(--secondary);
-    border-radius: 50%;
+    border-radius: 0px;
     display: grid; place-items: center;
     font-weight: 700;
 }
