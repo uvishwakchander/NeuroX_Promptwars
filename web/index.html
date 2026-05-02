@@ -1,184 +1,237 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NeuroX · Relay-Nudge Command Center</title>
-  <meta name="description" content="NeuroX Relay-Nudge Platform — Intelligent task redirection that protects deep work by routing urgent tasks away from hyper-focused team members." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroX · Cognitive Ecosystem</title>
+    <meta name="description" content="NeuroX — The intelligent cognitive ecosystem for neurodiverse high-performance.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Firebase SDK (Compat version for easier vanilla integration) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 </head>
-<body>
-  <!-- ───────── Ambient BG particles ───────── -->
-  <canvas id="particleCanvas"></canvas>
+<body class="auth-required">
+    <!-- Ambient Canvas -->
+    <canvas id="particleCanvas"></canvas>
 
-  <!-- ───────── Header ───────── -->
-  <header class="header" id="appHeader">
-    <div class="header__brand">
-      <div class="header__logo" id="logoOrb">
-        <span class="header__logo-ring"></span>
-        <span class="header__logo-core">NX</span>
-      </div>
-      <div>
-        <h1 class="header__title">NeuroX</h1>
-        <p class="header__sub">Relay-Nudge Command Center</p>
-      </div>
-    </div>
-    <div class="header__status">
-      <span class="header__dot" id="apiDot"></span>
-      <span class="header__status-text" id="apiStatus">Connecting…</span>
-    </div>
-  </header>
-
-  <!-- ───────── Main grid ───────── -->
-  <main class="dashboard" id="dashboard">
-
-    <!-- ─── Left: Team Profiles ─── -->
-    <section class="panel panel--profiles" id="profilesPanel">
-      <h2 class="panel__heading">
-        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
-        Team NeuroProfiles
-      </h2>
-      <div class="profiles-grid" id="profilesGrid">
-        <!-- JS-rendered -->
-      </div>
+    <!-- ───────── GATEWAY (AUTH) ───────── -->
+    <section id="view-gateway" class="view view--gateway active">
+        <div class="gateway-content">
+            <div class="gateway-logo">
+                <div class="logo-orb"></div>
+                <h1>NeuroX</h1>
+            </div>
+            <p class="gateway-tagline">Access your cognitive command center.</p>
+            <button id="googleLoginBtn" class="btn btn--google">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/pwa_google_signin_button.png" alt="Google Logo">
+                Connect with Google
+            </button>
+            <div class="gateway-visual">
+                <div class="glow-ring"></div>
+            </div>
+        </div>
     </section>
 
-    <!-- ─── Center: Relay Console ─── -->
-    <section class="panel panel--console" id="consolePanel">
-      <h2 class="panel__heading">
-        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-        Relay Nudge
-      </h2>
-
-      <form class="relay-form" id="relayForm" autocomplete="off">
-        <div class="form-row">
-          <div class="form-group">
-            <label for="taskId">Task ID</label>
-            <input type="text" id="taskId" placeholder="TSK-042" required />
-          </div>
-          <div class="form-group">
-            <label for="urgency">Urgency</label>
-            <select id="urgency" required>
-              <option value="critical">🔴 Critical</option>
-              <option value="high">🟠 High</option>
-              <option value="medium" selected>🟡 Medium</option>
-              <option value="low">🟢 Low</option>
-            </select>
-          </div>
+    <!-- ───────── LANDING (NARRATIVE) ───────── -->
+    <section id="view-landing" class="view view--landing hidden">
+        <div class="landing-hero">
+            <nav class="landing-nav">
+                <div class="logo">NX</div>
+                <button class="btn btn--outline" id="enterAppBtn">Enter Dashboard</button>
+            </nav>
+            <div class="hero-content">
+                <h1 class="hero-title">Protect Your <span class="glow-text">Flow</span>.</h1>
+                <p class="hero-sub">The first cognitive-state aware ecosystem designed for the neurodiverse mind.</p>
+                
+                <div class="cost-visualization">
+                    <h3>The Cost of Interruption</h3>
+                    <div class="cost-grid">
+                        <div class="cost-stat">
+                            <span class="stat-value" id="minutesLost">0</span>
+                            <span class="stat-label">Minutes Lost / Day</span>
+                        </div>
+                        <div class="cost-stat">
+                            <span class="stat-value" id="cognitiveDrain">0%</span>
+                            <span class="stat-label">Cognitive Drain</span>
+                        </div>
+                    </div>
+                    <input type="range" id="interruptionSlider" min="1" max="20" value="5">
+                    <p class="cost-caption">Simulating <span id="interruptionCount">5</span> interruptions per day.</p>
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-          <label for="taskTitle">Title</label>
-          <input type="text" id="taskTitle" placeholder="Production DB Outage" required maxlength="256" />
-        </div>
-
-        <div class="form-group">
-          <label for="taskDesc">Description</label>
-          <textarea id="taskDesc" rows="3" placeholder="Primary PostgreSQL cluster is unreachable. All write operations failing…" required></textarea>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label for="source">Source</label>
-            <input type="text" id="source" placeholder="PagerDuty" required />
-          </div>
-          <div class="form-group">
-            <label for="targetUser">Target User</label>
-            <select id="targetUser" required>
-              <option value="user-100">Vishwak Chander</option>
-              <option value="user-200">Kiran Desai</option>
-              <option value="user-300">Meena Rajput</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn--relay" id="submitBtn">
-          <span class="btn__text">Send Relay Nudge</span>
-          <span class="btn__loader" id="btnLoader"></span>
-        </button>
-      </form>
     </section>
 
-    <!-- ─── Right: Response / History ─── -->
-    <section class="panel panel--response" id="responsePanel">
-      <h2 class="panel__heading">
-        <svg class="panel__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Relay Response
-      </h2>
+    <!-- ───────── MAIN APP APP ───────── -->
+    <div id="main-layout" class="layout hidden">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar__header">
+                <div class="logo-nx">NX</div>
+            </div>
+            <nav class="sidebar__nav">
+                <button class="nav-item active" data-view="dashboard" title="Command Center">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                </button>
+                <button class="nav-item" data-view="social" title="Social & Relay">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </button>
+                <button class="nav-item" data-view="wellness" title="Wellness Tools">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                </button>
+                <button class="nav-item" data-view="focus" title="Focus Room">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+            </nav>
+            <div class="sidebar__footer">
+                <button class="nav-item" data-view="settings" title="The Brain (Settings)">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </button>
+                <div class="user-avatar" id="currentUserAvatar">V</div>
+            </div>
+        </aside>
 
-      <!-- Empty state -->
-      <div class="response-empty" id="responseEmpty">
-        <div class="response-empty__orb"></div>
-        <p>Waiting for a relay nudge…</p>
-      </div>
+        <!-- Main Content Area -->
+        <main class="content-area">
+            
+            <!-- ───────── VIEW: DASHBOARD ───────── -->
+            <section id="view-dashboard" class="view-content active">
+                <header class="content-header">
+                    <h2>Command Center</h2>
+                    <div class="api-status">
+                        <span class="dot" id="apiDot"></span>
+                        <span id="apiStatus">Syncing...</span>
+                    </div>
+                </header>
+                
+                <div class="dashboard-grid">
+                    <!-- The existing profiles/relay panel logic will live here -->
+                    <div class="dashboard-main">
+                        <div id="profilesPanel" class="module-card">
+                            <h3>NeuroProfiles</h3>
+                            <div id="profilesGrid" class="profiles-list"></div>
+                        </div>
+                    </div>
+                    <div class="dashboard-side">
+                        <div id="relayPanel" class="module-card">
+                            <h3>Relay Console</h3>
+                            <!-- Form here -->
+                            <form id="relayForm">
+                                <input type="text" id="taskId" placeholder="Task ID" required>
+                                <select id="urgency">
+                                    <option value="critical">Critical</option>
+                                    <option value="high">High</option>
+                                    <option value="medium" selected>Medium</option>
+                                </select>
+                                <input type="text" id="taskTitle" placeholder="Title" required>
+                                <textarea id="taskDesc" placeholder="Description" required></textarea>
+                                <input type="text" id="source" placeholder="Source">
+                                <select id="targetUser">
+                                    <option value="user-100">Vishwak</option>
+                                    <option value="user-200">Kiran</option>
+                                </select>
+                                <button type="submit" class="btn btn--primary">Relay Nudge</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      <!-- Success card -->
-      <div class="response-card hidden" id="responseCard">
-        <div class="response-card__badge" id="responseBadge">REDIRECTED</div>
+            <!-- ───────── VIEW: SOCIAL ───────── -->
+            <section id="view-social" class="view-content">
+                <h2>Neuro-Network</h2>
+                <div class="social-container">
+                    <div class="feed" id="socialFeed">
+                        <!-- Post templates -->
+                    </div>
+                </div>
+            </section>
 
-        <div class="response-card__flow">
-          <div class="flow-node flow-node--from">
-            <span class="flow-node__label">From</span>
-            <span class="flow-node__name" id="resFrom">—</span>
-          </div>
-          <div class="flow-arrow">
-            <svg viewBox="0 0 48 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h40m0 0l-8-8m8 8l-8 8"/></svg>
-          </div>
-          <div class="flow-node flow-node--to">
-            <span class="flow-node__label">To</span>
-            <span class="flow-node__name" id="resTo">—</span>
-            <span class="flow-node__state" id="resToState">—</span>
-          </div>
-        </div>
+            <!-- ───────── VIEW: WELLNESS ───────── -->
+            <section id="view-wellness" class="view-content">
+                <div class="wellness-grid">
+                    <div class="module-card wellness-card" id="game-module">
+                        <h3>Bubble Focus</h3>
+                        <div class="game-container">
+                            <canvas id="gameCanvas"></canvas>
+                            <div class="game-overlay-ui">
+                                <button id="startGameBtn" class="btn btn--accent">Start Focus Session</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="module-card wellness-card" id="therapy-module">
+                        <h3>AI Therapy Chat</h3>
+                        <div class="chat-container">
+                            <div id="chatHistory" class="chat-history"></div>
+                            <div class="chat-input-area">
+                                <input type="text" id="chatInput" placeholder="How's your mind feeling?">
+                                <button id="sendChatBtn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="response-card__metrics">
-          <div class="metric">
-            <span class="metric__label">Task Score</span>
-            <span class="metric__value" id="resScore">—</span>
-          </div>
-          <div class="metric">
-            <span class="metric__label">Task ID</span>
-            <span class="metric__value" id="resTaskId">—</span>
-          </div>
-        </div>
+            <!-- ───────── VIEW: FOCUS ───────── -->
+            <section id="view-focus" class="view-content">
+                <div class="focus-room">
+                    <div class="room-header">
+                        <h2>The Focus Room</h2>
+                        <span class="live-badge">3 People Body-Doubling</span>
+                    </div>
+                    <div class="ambient-controls">
+                        <button class="sound-btn" data-sound="rain">Rain</button>
+                        <button class="sound-btn" data-sound="waves">Waves</button>
+                        <button class="sound-btn" data-sound="static">White Noise</button>
+                    </div>
+                    <div class="video-grid">
+                        <!-- Muted body-doubling avatars -->
+                        <div class="peer-video">
+                            <div class="peer-avatar">K</div>
+                            <div class="peer-state">In Hyperfocus</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="response-card__summary">
-          <span class="summary__label">AI Summary</span>
-          <p class="summary__text" id="resSummary">—</p>
-        </div>
-      </div>
+            <!-- ───────── VIEW: SETTINGS ───────── -->
+            <section id="view-settings" class="view-content">
+                <h2>The Brain</h2>
+                <div class="settings-grid">
+                    <div class="module-card">
+                        <h3>Profile</h3>
+                        <div class="setting-item">
+                            <label>Default State</label>
+                            <select>
+                                <option>Always ask</option>
+                                <option>Smart Detection</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-      <!-- Error card -->
-      <div class="response-error hidden" id="responseError">
-        <div class="response-error__icon">⚠</div>
-        <p class="response-error__code" id="errCode">—</p>
-        <p class="response-error__detail" id="errDetail">—</p>
-      </div>
-
-      <!-- History -->
-      <div class="history" id="historySection">
-        <h3 class="history__heading">Recent Relays</h3>
-        <ul class="history__list" id="historyList">
-          <!-- JS-rendered -->
-        </ul>
-      </div>
-    </section>
-  </main>
-
-  <!-- ───────── Score gauge overlay ───────── -->
-  <div class="gauge-overlay hidden" id="gaugeOverlay">
-    <div class="gauge">
-      <svg class="gauge__svg" viewBox="0 0 120 120">
-        <circle class="gauge__track" cx="60" cy="60" r="52" />
-        <circle class="gauge__fill" id="gaugeFill" cx="60" cy="60" r="52" />
-      </svg>
-      <span class="gauge__value" id="gaugeValue">0</span>
+        </main>
     </div>
-  </div>
 
-  <script src="app.js"></script>
+    <!-- Gauge Overlay -->
+    <div class="gauge-overlay hidden" id="gaugeOverlay">
+        <div class="gauge-container">
+            <svg class="gauge-svg" viewBox="0 0 100 100">
+                <circle class="gauge-bg" cx="50" cy="50" r="45"></circle>
+                <circle class="gauge-progress" id="gaugeFill" cx="50" cy="50" r="45"></circle>
+            </svg>
+            <div class="gauge-text" id="gaugeValue">0</div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>

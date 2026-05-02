@@ -127,6 +127,26 @@ async def health_check() -> dict[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# POST /therapy-chat
+# ---------------------------------------------------------------------------
+
+@app.post("/therapy-chat")
+async def therapy_chat(request: Request):
+    data = await request.json()
+    user_msg = data.get("message")
+    
+    if not model:
+        return {"reply": "I'm in offline mode right now, but I can tell you're looking for support. Take a deep breath."}
+    
+    try:
+        prompt = f"You are an empathetic AI therapist for neurodiverse individuals. User says: {user_msg}. Respond concisely and supportively."
+        response = model.generate_content(prompt)
+        return {"reply": response.text}
+    except Exception as e:
+        return {"reply": "My neural processors are a bit overwhelmed. Let's try again in a moment."}
+
+
+# ---------------------------------------------------------------------------
 # POST /relay-nudge
 # ---------------------------------------------------------------------------
 
