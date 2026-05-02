@@ -127,6 +127,24 @@ async def health_check() -> dict[str, str]:
 
 
 # ---------------------------------------------------------------------------
+# Gemini API Initialization
+# ---------------------------------------------------------------------------
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+model = None
+if GEMINI_API_KEY:
+    try:
+        genai.configure(api_key=GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-1.5-flash')
+    except Exception as e:
+        logger.error(f"Failed to initialize Gemini model: {e}")
+
+# ---------------------------------------------------------------------------
 # POST /therapy-chat
 # ---------------------------------------------------------------------------
 
@@ -136,13 +154,14 @@ async def therapy_chat(request: Request):
     user_msg = data.get("message")
     
     if not model:
-        return {"reply": "I'm in offline mode right now, but I can tell you're looking for support. Take a deep breath."}
+        return {"reply": "I'm in offline mode right now, but I can tell you're looking for support. Take a deep breath. (API Key not configured)"}
     
     try:
         prompt = f"You are an empathetic AI therapist for neurodiverse individuals. User says: {user_msg}. Respond concisely and supportively."
         response = model.generate_content(prompt)
         return {"reply": response.text}
     except Exception as e:
+        logger.error(f"Gemini API Error: {e}")
         return {"reply": "My neural processors are a bit overwhelmed. Let's try again in a moment."}
 
 
